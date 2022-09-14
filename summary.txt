@@ -1,0 +1,361 @@
+JAVA 8
+
+//if aclass have method with return type or void if you want to use that class then you need to creat the object for that class and call the method
+instead of this just use below java 8 features
+//if a  metunctional interface mehod have any return type then use this
+
+//java 7
+Runnable runnable=new Runnable() {
+
+			@Override
+			public void run() {
+				System.out.println("Inside Runnable 1");
+				
+			}};
+new Thread(runnable).start();
+
+//java 8
+Runnable runnableLambda=()->{
+				System.out.println("Inside Runnable 2");
+			};
+new Thread(runnableLambda).start();
+
+//if the class method have return type then
+
+//java7
+Comparator<Integer> comparator=new Comparator<Integer>() {
+
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o1.compareTo(o2);
+			}};
+			System.out.println("Result for comparator :"+comparator.compare(3, 4));
+//java8			
+			Comparator<Integer> comparator1=(Integer a,Integer b)-> a.compareTo(b);
+			System.out.println("Result from lambda :"+comparator1.compare(3, 4));
+
+//Consumer is a functional interface it have one method called accept which take one parameter as input and its return type is void
+Consumer<String> c=(a)->System.out.println(a.toUpperCase());
+			c.accept("java 8");
+
+//Foreach loop will iterate list of object one by one.Foreach loop will always take consumer as an input
+Consumer<Student> c2=(student)->System.out.println(student);
+		List<Student> allStudents = StudentDataBase.getAllStudents();
+		allStudents.forEach(c2);
+//fecthing only student name using consumer
+Consumer<Student> c3=(student)->System.out.println(student.getName());
+
+//use two consumer inside one foreach loop
+studentList.forEach(c3.andThen(c4));
+
+//fetch student using condition printNamesAndActivitiesusingcondition
+studentList.forEach((Student -> {
+			if (Student.getGradeLevel() >= 3 && Student.getGpa()>=3.9) {
+				c3.andThen(c4).accept(Student);
+			}
+		}));
+
+//Biconsumer it will take two input as a parameter nd doestn't retur anything 
+BiConsumer<String,String> biconsumer=(a,b)->System.out.println("a :"+a+"   b:"+b);
+		biconsumer.accept("java 7", "java 8");
+
+//if you want to fetch name and activities we can do this two ways(note we can apply this with consumer as well)
+           /First Way
+static BiConsumer<Student,Student> biConsumer=(student,student1)->System.out.println(student.getName()+" "+student1.getActivities());
+	public static void nameandActivities() {
+		List<Student> allStudents = StudentDataBase.getAllStudents();
+		allStudents.forEach(student->biConsumer.accept(student, student));
+           //Second Way
+static BiConsumer<String,List<String>> biConsumer=(name,activities)->System.out.println(name+" "+activities);
+	public static void nameandActivities() {
+		List<Student> allStudents = StudentDataBase.getAllStudents();
+		allStudents.forEach(student->biConsumer.accept(student.getName(), student.getActivities()));
+	}
+
+
+//predicate :It takes one input as a parameter and return bolean result.it has test method we need to call using predicate
+Predicate<Integer> p1 = (i) -> i % 2 == 0;
+System.out.println(p1.test(6));
+
+//we can use and operator to use two predicate result will be true if both find true in or case only only is true then the result will be true
+//in negate will convert the two predicate result into oppposite 
+
+System.out.println("Predicate Negate :"+p1.and(p2).test(10));
+		System.out.println("Predicate Negate :"+p1.or(p2).negate().test(8));
+
+
+//predicate Student Example .(we can solve this problem with different way as well we did for consumer and biconsumer)
+//predicate always come inside consumer 
+	static Predicate<Student> p1 = (s) -> s.getGradeLevel() >= 3;
+
+	public static void filterStudentByGradeLevel() {
+		List<Student> allStudents = StudentDataBase.getAllStudents();
+		allStudents.forEach((student -> {
+			if (p1.test(student)) {
+				System.out.println(student);
+			}
+		}));
+
+	}
+
+//Functiona is also function interface have apply method it recieve two parameter one is input parameter and one is return type as a parametr
+//it have one apply method
+//andthen is use to combine two function interfaces
+//compose is also use to combine two function interfaces
+static Function<String,String> function=(name)->name.toUpperCase();
+System.out.println("Result is :"+function.apply("java"));
+
+
+imp
+//If you want list<Student>> as a parameter input then you can use consumer inside that functional interface and can write foreach method to iterate list<Student> inside that foreach loop
+you can write consumer and perform action like below example.
+note:you can apply this for all functional interfaces like consumer,predicate,consumer,supplier
+note:always call apply method using function interface inside sysout
+static Function<List<Student>, Map<String, Double>> studentFunction = (students -> {
+		Map<String, Double> mapStudent = new HashMap<String, Double>();
+		students.forEach(student -> {
+			mapStudent.put(student.getName(), student.getGpa());
+		});
+		return mapStudent;
+	});
+ System.out.println(studentFunction.apply(StudentDataBase.getAllStudents()));
+
+//BiFunction functional interface have apply method which takes two input parameters and one return type
+example
+static BiFunction<List<Student>,Predicate<Student>,Map<String,Double>> biFunction=((students,predicate)->{
+		Map<String,Double> studentGrademap=new HashMap<String,Double>();
+		students.forEach(student->{
+			if(predicate.test(student)) {
+				studentGrademap.put(student.getName(), student.getGpa());
+			}
+		});
+
+		return studentGrademap;
+	});
+
+System.out.println(biFunction.apply(StudentDataBase.getAllStudents(), PredicateStudentExample.p1));
+
+//we can also use Bifunctional as used for consumer,function and predicate
+
+List<Student> allStudents = StudentDataBase.getAllStudents();
+       
+       BiFunction<Student,Predicate,Set<Student>> bifunc=((student,predicate)->{
+    	   Set<Student> std=new HashSet<Student>();
+    	  // Map<String,Double> std=new HashMap<String,Double>();
+    	   if(predicate.test(student)) {
+    		 //std.put(student.getName(), student.getGpa());
+    		   std.add(student);
+    	   }
+    	   return std;
+       });
+       allStudents.forEach(student->{
+    	 //   biFunction.apply(allStudents, PredicateStudentExample.p1);
+    	  System.out.println(bifunc.apply(student, PredicateStudentExample.p1));
+    	 return ;
+       });
+
+//Unary is extending from function interface and it have apply method it takes one input and return the same input
+static UnaryOperator<String> unaryOperator=(s)->s.concat(" default");
+
+//Binary is extending from function interface and it also have apply method it takes two parameter as input and return one input as same data type
+BinaryOperator<Integer> binaryoperator=(a,b)->a*b;
+		System.out.println(binaryoperator.apply(3,4));
+		BinaryOperator<Integer> maxBy = BinaryOperator.maxBy(comparator);
+		System.out.println("Result of MaxBy is :"+maxBy.apply(4, 5));
+		
+
+
+Method Reference
+//function method reference
+static Function<String,String> toUpperCaselambda=(s)->s.toUpperCase();
+static Function<String,String> toMethodReference=String::toUpperCase;
+
+//consumer method reference
+static Consumer<Student> c2=System.out::println;
+static Consumer<Student> c3=Student::printListOfActivities;
+
+//In Lambda we can use local and instance variable but in lambda we can reassign instance variable but not local variable
+static int value=10;
+		Consumer<Integer> c2=(i)->{
+			value++;
+			System.out.println(value+i);
+		};
+		c2.accept(4);
+
+//Stream api
+//if you want to get name and activities of student using stream then you can use toMap method inside collect which will return key and value
+Map<String, List<String>> studentMap = StudentDataBase.getAllStudents().stream().collect(Collectors.toMap(Student::getName, Student::getActivities));
+		System.out.println(studentMap);
+
+//you use filter inside filter you can write predicate(note:inside one filter you can write one predicate and you can use two filters a below)
+
+		Predicate<Student> studentPredicate=(student)->student.getGradeLevel()>=3;
+		Predicate<Student> studentGpaPredicate=(student)->student.getGpa()>=3.9;
+		Map<String, List<String>> studentMap = StudentDataBase.getAllStudents().parallelStream()
+				.filter(student->student.getGradeLevel()>=3)
+				.filter(student->student.getGpa()>=3.9)
+				.collect(Collectors.toMap(Student::getName, Student::getActivities));
+		System.out.println(studentMap);
+
+//peek is used for streaming colllection of data.It accept consumer and we can apply peek after filter and before the the filter as well.we can only use peek after the stream.
+Predicate<Student> studentPredicate=(student)->student.getGradeLevel()>=3;
+		Predicate<Student> studentGpaPredicate=(student)->student.getGpa()>=3.9;
+		Map<String, List<String>> studentMap = StudentDataBase.getAllStudents().stream()
+				.peek(student->System.out.println(student))
+				.filter(student->student.getGradeLevel()>=3)
+				.peek(student->System.out.println("After 1st filter :"+student))
+				.filter(student->student.getGpa()>=3.9)
+				.peek(student->System.out.println("after second filter :"+student))
+				.collect(Collectors.toMap(Student::getName, Student::getActivities));
+		System.out.println(studentMap);
+
+//map is used after the stream and it takes function and return single thing like name etc(we can use method reference as well inside map)
+(note in entire one stream we can use only one map cant use two map inside one stream)
+(use to map inside one stream only for same fields for the student example like below)
+	List<String> collect = StudentDataBase.getAllStudents().stream()
+	.map(Student::getName)
+	.map(String::toUpperCase)
+	.collect(Collectors.toList());
+	return collect;
+
+//flatmap convert one type to other type.it is used after the map 
+List<String> collect = StudentDataBase.getAllStudents().stream()
+     .map(Student::getActivities)
+     .flatMap(List::stream)
+     .collect(Collectors.toList());
+		return collect;
+
+//distinct() is used for getting distinct value(it can be used after map or flatmap)
+List<String> collect = StudentDataBase.getAllStudents().stream().map(Student::getActivities)
+				.flatMap(List::stream)
+				.distinct()
+				.collect(Collectors.toList());
+		return collect;
+//count-return long result
+//sorted -use for sorting
+
+//sorted for sorting specific element from the object(inside the sorted method we can use function or method reference as well)
+//.sorted(Comparator.comparing(student->student.getName()))
+		List<Student> collect = StudentDataBase.getAllStudents().stream()
+		.sorted(Comparator.comparing(student->student.getName()))
+		.collect(Collectors.toList());
+		return collect;
+
+//for sorting in descending order
+.sorted(Comparator.comparing(Student::getGpa).reversed())
+
+//Reduce is a terminal operator it have two parametetr one is initial value and second one is binary operator which we discused inside the function interface
+//we can use reduce for condition and return type as well//reduce can return only that binary operator returns
+Integer reduce = integersList.stream().reduce(1,(a,b)->a*b);
+		return reduce;
+ //one more example for reduce
+Optional<Integer> reduce = integerList.stream()
+          .reduce((a,b)->a*b);
+
+//reduce example for if else and return 
+Optional<Student> reduce = StudentDataBase.getAllStudents().stream()
+          .reduce((s1,s2)->s1.getGpa()>s2.getGpa() ? s1:s2); //this one
+		return reduce;
+
+//Limit :It takes long as a parameter and return stream consisting of the remaining element(it takes only one parameter)
+Optional<Integer> reduce = integerList.stream()
+		.limit(2).reduce((x,y)->x+y);
+
+//Skip :It takes long a a parameter and return stream consisiting of the remaining element
+Optional<Integer> reduce = integerList.stream()
+		.skip(3).reduce((x,y)->x+y);
+
+//Match,anymatch and nonmatch all these function takes predicate as a input and return boolean as a result.
+
+//pdf 13_14 
+of()->it creates streams of certain value passed to this method
+iterate()->is used to create infinite streams.It takes two parameter one is initial value and second one is binary operator
+generate()->It is also use for infinite stream.it takes only one parameter which is supplier
+
+//Numeric Streams
+-intStream  (RangClose will take two parameter one is initial value and second one is final value and return intstream)
+-longStream same for longstream as intstream
+-DoubleStream  same for doublestream as intstream
+
+Numeric Stream Aggregation function
+sum()
+max()
+min()
+average()
+
+-Boxing-convert primitive to wrapper(Boxed() is use for boxing)
+-unboxing-convert wrapper to primitive (for unboxing we use maptoint() function)
+
+maptoobject-it will convert numeric stream to object(maptoobject take function as aparameter)
+maptolong-convert numeric stream to longstream
+maptodouble-convert numeric stream to double stream
+
+TERMINAL OPERATOR  PDF-15
+Joining()-it joints the map data into string
+String collect = StudentDataBase.getAllStudents().stream()
+		.map(Student::getName)
+		.collect(Collectors.joining());
+		return collect;
+
+counting()-collectors return totla number of elements as a result
+
+mapping()-mapping collector applies a transformation function first and collects the data in a collection.
+(it takes two parameter one is function and second one is collector)
+
+maxBy(),minBy()-->take comaprator as in input parameter and return optional as an output.
+
+summingint(),averaginint()-->this colllectors returns sum,averaging  as a result.Both Take function as an input.
+
+groupBy()-->group element based on property.It takes function as a parameter and return key value in map.
+Map<String, List<Student>> collect = StudentDataBase.getAllStudents().stream()
+		.collect(Collectors.groupingBy(student->student.getGender()));
+
+//we can take two level of grouping as well.inside grouping pass one parameter as a function interface second parameter will be groupingby inside second frouping by write function interface
+Map<String, Map<String, List<Student>>> collect = StudentDataBase.getAllStudents().stream()
+				.collect(Collectors.groupingBy(Student::getGender,
+						Collectors.groupingBy(student -> student.getGpa() >= 3.9 ? "outstanding" : "average")));//we can use condition in function interface and return result as string
+
+//we can also take inside grouping() another terminal opertor like summingint and other as well
+Map<Integer,Integer> collect = StudentDataBase.getAllStudents().stream()
+		.collect(Collectors.groupingBy(Student::getGradeLevel,Collectors.summingInt(Student::getNoteBooks)));
+
+PartitioningBy()-->It accepts predicate as input and return map<k,v>
+Map<Boolean, List<Student>> collect = StudentDataBase.getAllStudents().stream()
+				.collect(Collectors.partitioningBy(student -> student.getGpa() >= 3.9));
+
+PDF-16
+PARALLEL PROCESSING:splite the source of data in to multiple parts.process them parallely.combine the result.
+parallel stream takes less time as compare to the stream but it takes more time in autoboxing
+
+PDF-17
+Optional:reperesents non null value.Avoids null pointer exception and unnecessary null checks.
+OfNullable takes input it could be string or list<Student object>.if we pass null value to the ofNullable method then it won't throw null pointer exception.
+
+OrElse()->it is used if stream of data return null then we can use orelse() wih some default value
+orElseGet()->its purpose also same as orElse.It takes only one parameter as an input as a suplier
+orElseThrow->its also same as orelseget but it takes consumer as an input and return new exception
+
+// Instead of writing isPresent and write the sysout and use get jut use this
+ofNullable.ifPresent(s->System.out.println(s));//here inside ifPresent write consumer
+
+PDF-18
+//
+List<String> stringList = Arrays.asList("Adam","Jenny","Alex","Dan","Mike","Eric");
+stringList.sort(Comparator.naturalOrder());
+System.out.println("Sorting in Ascending order :"+stringList);
+
+//comparator chaining example
+note(if we use comparator1.thencomparing(secondcomparator )//will give first priority inside thencomparing comprator
+static Consumer<Student> studentConsumer = (Student -> System.out.println(Student));
+	static Comparator<Student> nameComparator=Comparator.comparing(Student::getName);
+	static Comparator<Student> gradeComparator=Comparator.comparing(Student::getGradeLevel);
+
+		public static void ComparatorChaining(List<Student> studentList) {
+	    System.out.println("After comparatorChaining");	
+	    studentList.sort(gradeComparator.thenComparing(nameComparator));
+	    studentList.forEach(studentConsumer);
+	}
+//if we are using comparator and if we have list of object in that there may be a chance of null value inside the list of object then use this below code
+Comparator<Student> studentComparator = Comparator.nullsFirst(nameComparator);//use if null value is there in the list of objects it will not throw exception
+		studentList.sort(studentComparator);
+		studentList.forEach(studentConsumer);
